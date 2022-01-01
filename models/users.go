@@ -242,3 +242,29 @@ func Authenticate(token string) (UserClaims, error) {
 
 	return claim, nil
 }
+
+// CREATE TABLE IF NOT EXISTS "token_codes" (
+//     token_code_id character varying(45) PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+//     token_code_email character varying(200) NOT NULL,
+//     token_code_value character varying(6) NOT NULL,
+//     token_code_status character varying(45) NOT NULL DEFAULT 'active',
+//     token_code_created_at timestamp with time zone NOT NULL DEFAULT now(),
+//     token_code_updated_at timestamp with time zone NOT NULL DEFAULT now(),
+//     CONSTRAINT token_code_status_check CHECK (token_code_status IN ('active', 'inactive'))
+// )
+// WITH (
+//     OIDS = FALSE
+// );
+func (u *User) SaveCode(code string) error {
+	db := models.Connection
+
+	query := `INSERT INTO token_codes (token_code_email, token_code_value) VALUES ($1, $2)`
+
+	_, err := db.Exec(query, u.Email, code)
+
+	if err != nil {
+		return fmt.Errorf("error saving code: %s", err)
+	}
+
+	return nil
+}

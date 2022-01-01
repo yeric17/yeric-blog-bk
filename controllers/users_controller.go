@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"math/rand"
 	"net/http"
 	"yeric-blog/models"
 	"yeric-blog/utils"
@@ -236,4 +237,48 @@ func Authenticate(g *gin.Context) {
 
 	g.JSON(http.StatusOK, resp)
 
+}
+
+func CreateTokenCode(g *gin.Context) {
+	//create random code, length 6, uppercase
+	user := &models.User{}
+
+	if err := g.BindJSON(&user); err != nil {
+		resp := utils.JSONResponse{
+			Success: false,
+			Message: fmt.Sprintf("Error parsing user: %s", err.Error()),
+			Data:    nil,
+		}
+		g.JSON(http.StatusBadRequest, resp)
+		fmt.Println(err)
+		return
+	}
+
+	letterRunes := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+	code := make([]rune, 6)
+	for i := range code {
+		code[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	codeString := string(code)
+
+	err := user.SaveCode(codeString)
+
+	if err != nil {
+		resp := utils.JSONResponse{
+			Success: false,
+			Message: fmt.Sprintf("Error saving code: %s", err.Error()),
+			Data:    nil,
+		}
+		g.JSON(http.StatusInternalServerError, resp)
+		fmt.Println(err)
+		return
+	}
+
+	resp := utils.JSONResponse{
+		Success: true,
+		Message: "Code created",
+		Data:    codeString,
+	}
+
+	g.JSON(http.StatusOK, resp)
 }

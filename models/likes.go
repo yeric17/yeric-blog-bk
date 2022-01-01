@@ -22,7 +22,7 @@ type LikeResponse struct {
 func (l *Like) Create() error {
 	db := models.Connection
 
-	fmt.Printf("%+v\n", l)
+	//fmt.Printf("%+v\n", l)
 	query := `INSERT INTO likes (like_entity_id, like_user_id, like_type) VALUES ($1, $2, $3)`
 
 	_, err := db.Exec(query, l.EntityID, l.AuthorID, l.EntityType)

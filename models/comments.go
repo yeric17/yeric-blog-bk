@@ -166,7 +166,7 @@ func (c *CommentResponse) GetComments(entityType string, postID string, commentI
 			comment.CommentID = nullCommentID.String
 		}
 
-		fmt.Printf("comment: %+v\n", comment)
+		//fmt.Printf("comment: %+v\n", comment)
 
 		//get likes
 		like := &LikeResponse{}
@@ -207,6 +207,28 @@ func (c *Comment) AddCommentLike() error {
 
 	if err != nil {
 		return fmt.Errorf("error creating like: %s", err)
+	}
+
+	return nil
+}
+
+func (c *CommentResponse) GetCommentByID(commentID string) error {
+	db := models.Connection
+
+	query := `SELECT comment_id, comment_content, comment_user_id, user_name, user_picture, comment_post_id, comment_comment_id, comment_type, comment_created_at, comment_updated_at FROM comments 
+	LEFT JOIN users ON comments.comment_user_id = users.user_id
+	WHERE comment_id = $1`
+
+	nullCommentID := sql.NullString{}
+
+	err := db.QueryRow(query, commentID).Scan(&c.ID, &c.Content, &c.Author.ID, &c.Author.Name, &c.Author.Picture, &c.PostID, &nullCommentID, &c.EntityType, &c.CreatedAt, &c.UpdatedAt)
+
+	if err != nil {
+		return fmt.Errorf("error getting comment: %s", err)
+	}
+
+	if nullCommentID.Valid {
+		c.CommentID = nullCommentID.String
 	}
 
 	return nil

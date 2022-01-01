@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 	"yeric-blog/models"
 	"yeric-blog/utils"
@@ -106,7 +105,7 @@ func CreateComment(g *gin.Context) {
 		return
 	}
 
-	fmt.Printf("%+v\n", comment)
+	//fmt.Printf("%+v\n", comment)
 
 	if err := comment.Create(); err != nil {
 		reps := &utils.JSONResponse{
@@ -153,7 +152,7 @@ func GetComments(g *gin.Context) {
 	comment_id := g.Query("comment_id")
 	entity_type := g.Query("entity_type")
 
-	fmt.Printf("post_id: %s; comment_id: %s; entity_type: %s\n", post_id, comment_id, entity_type)
+	//fmt.Printf("post_id: %s; comment_id: %s; entity_type: %s\n", post_id, comment_id, entity_type)
 
 	if entity_type == "" {
 		resp := &utils.JSONResponse{
@@ -183,6 +182,27 @@ func GetComments(g *gin.Context) {
 		Success: true,
 		Message: "Comments retrieved successfully",
 		Data:    comments,
+	}
+	g.JSON(http.StatusOK, resp)
+}
+
+func GetCommentByID(g *gin.Context) {
+	comment := models.CommentResponse{}
+
+	if err := comment.GetCommentByID(g.Param("id")); err != nil {
+		reps := &utils.JSONResponse{
+			Success: false,
+			Message: "Error getting comment; " + err.Error(),
+			Data:    nil,
+		}
+		g.JSON(http.StatusNotFound, reps)
+		return
+	}
+
+	resp := &utils.JSONResponse{
+		Success: true,
+		Message: "Comment retrieved successfully",
+		Data:    comment,
 	}
 	g.JSON(http.StatusOK, resp)
 }

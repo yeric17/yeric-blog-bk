@@ -100,6 +100,18 @@ WITH (
     OIDS = FALSE
 );
 
+CREATE TABLE IF NOT EXISTS "token_codes" (
+    token_code_id character varying(45) PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    token_code_email character varying(200) NOT NULL,
+    token_code_value character varying(6) NOT NULL,
+    token_code_status character varying(45) NOT NULL DEFAULT 'active',
+    token_code_created_at timestamp with time zone NOT NULL DEFAULT now(),
+    token_code_updated_at timestamp with time zone NOT NULL DEFAULT now(),
+    CONSTRAINT token_code_status_check CHECK (token_code_status IN ('active', 'inactive'))
+)
+WITH (
+    OIDS = FALSE
+);
 
 ALTER TABLE IF EXISTS "users"
     ADD FOREIGN KEY (user_role_id) 

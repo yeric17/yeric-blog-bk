@@ -32,6 +32,7 @@ func main() {
 	router.PUT("/users", controllers.UpdateUser)
 	router.POST("/users/login", controllers.UserLogin)
 	router.GET("/users/auth", controllers.Authenticate)
+	router.POST("/users/code", controllers.CreateTokenCode)
 
 	router.POST("/posts", controllers.CreatePost)
 	router.GET("/posts", controllers.GetPosts)
@@ -39,6 +40,7 @@ func main() {
 	router.POST("/posts/comment", controllers.CreateComment)
 	router.GET("/posts/id/:id", controllers.GetPostByID)
 	router.GET("/comments", controllers.GetComments)
+	router.GET("/comments/id/:id", controllers.GetCommentByID)
 
 	router.Run(":" + config.APP_PORT)
 

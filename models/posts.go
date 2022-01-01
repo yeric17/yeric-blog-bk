@@ -56,7 +56,7 @@ func (p *Post) Create() error {
 		return fmt.Errorf("error creating post: %v", err)
 	}
 
-	fmt.Println(p.CreatedAt.Hour())
+	//fmt.Println(p.CreatedAt.Hour())
 	return nil
 }
 
