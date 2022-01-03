@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"fmt"
-	"math/rand"
 	"net/http"
 	"yeric-blog/models"
 	"yeric-blog/utils"
@@ -239,8 +238,8 @@ func Authenticate(g *gin.Context) {
 
 }
 
-func CreateTokenCode(g *gin.Context) {
-	//create random code, length 6, uppercase
+func Register(g *gin.Context) {
+
 	user := &models.User{}
 
 	if err := g.BindJSON(&user); err != nil {
@@ -254,19 +253,12 @@ func CreateTokenCode(g *gin.Context) {
 		return
 	}
 
-	letterRunes := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-	code := make([]rune, 6)
-	for i := range code {
-		code[i] = letterRunes[rand.Intn(len(letterRunes))]
-	}
-	codeString := string(code)
-
-	err := user.SaveCode(codeString)
+	id, err := models.SaveEmailToConfirm(user.Email)
 
 	if err != nil {
 		resp := utils.JSONResponse{
 			Success: false,
-			Message: fmt.Sprintf("Error saving code: %s", err.Error()),
+			Message: fmt.Sprintf("Error confirming email save email: %s", err.Error()),
 			Data:    nil,
 		}
 		g.JSON(http.StatusInternalServerError, resp)
@@ -274,11 +266,53 @@ func CreateTokenCode(g *gin.Context) {
 		return
 	}
 
-	resp := utils.JSONResponse{
-		Success: true,
-		Message: "Code created",
-		Data:    codeString,
+	err = models.SendMail("Confirm your email", fmt.Sprintf("http://localhost:7070/confirm/%s", id), user.Email)
+
+	if err != nil {
+		resp := utils.JSONResponse{
+			Success: false,
+			Message: fmt.Sprintf("Error sending email: %s", err.Error()),
+			Data:    nil,
+		}
+		g.JSON(http.StatusInternalServerError, resp)
+		fmt.Println(err)
+		return
 	}
 
-	g.JSON(http.StatusOK, resp)
+	if err := user.Create(); err != nil {
+		resp := utils.JSONResponse{
+			Success: false,
+			Message: fmt.Sprintf("Error creating user: %s", err.Error()),
+			Data:    nil,
+		}
+		g.JSON(http.StatusInternalServerError, resp)
+		fmt.Println(err)
+		return
+	}
+
+	user.Password = ""
+	resp := utils.JSONResponse{
+		Success: true,
+		Message: "User created",
+		Data:    user,
+	}
+
+	g.JSON(http.StatusCreated, resp)
+}
+
+func ConfirmEmail(g *gin.Context) {
+	id := g.Param("id")
+
+	if err := models.ConfirmEmail(id); err != nil {
+		resp := utils.JSONResponse{
+			Success: false,
+			Message: fmt.Sprintf("Error confirming email: %s", err.Error()),
+			Data:    nil,
+		}
+		g.JSON(http.StatusInternalServerError, resp)
+		fmt.Println(err)
+		return
+	}
+
+	g.Redirect(http.StatusMovedPermanently, "http://localhost:3000/login")
 }

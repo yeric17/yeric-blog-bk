@@ -7,13 +7,13 @@ CREATE TABLE IF NOT EXISTS "users" (
     user_name character varying(200) NOT NULL UNIQUE,
     email character varying(200) NOT NULL UNIQUE,
     password text NOT NULL,
-    user_status character varying(45) NOT NULL DEFAULT 'active',
+    user_status character varying(45) NOT NULL DEFAULT 'email_not_verified',
     user_picture text NOT NULL DEFAULT 'http://localhost:7070/images/default_image.png',
     user_role_id int,
     user_created_at timestamp with time zone NOT NULL DEFAULT now(),
     user_updated_at timestamp with time zone NOT NULL DEFAULT now(),
     PRIMARY KEY (user_id),
-    CONSTRAINT user_status_check CHECK (user_status IN ('active', 'inactive'))
+    CONSTRAINT user_status_check CHECK (user_status IN ('active', 'inactive', 'email_not_verified')),
    
 ) 
 WITH (
@@ -100,14 +100,13 @@ WITH (
     OIDS = FALSE
 );
 
-CREATE TABLE IF NOT EXISTS "token_codes" (
-    token_code_id character varying(45) PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
-    token_code_email character varying(200) NOT NULL,
-    token_code_value character varying(6) NOT NULL,
-    token_code_status character varying(45) NOT NULL DEFAULT 'active',
-    token_code_created_at timestamp with time zone NOT NULL DEFAULT now(),
-    token_code_updated_at timestamp with time zone NOT NULL DEFAULT now(),
-    CONSTRAINT token_code_status_check CHECK (token_code_status IN ('active', 'inactive'))
+CREATE TABLE IF NOT EXISTS "email_confirms" (
+    email_confirms_id character varying(45) PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    email_confirms_email character varying(200) NOT NULL,
+    email_confirms_status character varying(45) NOT NULL DEFAULT 'active',
+    email_confirms_created_at timestamp with time zone NOT NULL DEFAULT now(),
+    email_confirms_updated_at timestamp with time zone NOT NULL DEFAULT now(),
+    CONSTRAINT email_confirms_status_check CHECK (email_confirms_status IN ('active', 'inactive'))
 )
 WITH (
     OIDS = FALSE

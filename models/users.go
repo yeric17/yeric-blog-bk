@@ -204,6 +204,13 @@ func (u *User) Login() (string, error) {
 		return "", fmt.Errorf("error logging in: %s", err)
 	}
 
+	if u.Status == "email_not_verified" {
+		return "", fmt.Errorf("error logging in: email not verified")
+	}
+	if u.Status == "inactive" {
+		return "", fmt.Errorf("error logging in: user is inactive")
+	}
+
 	u.Password = ""
 
 	claim := UserClaims{
@@ -243,27 +250,63 @@ func Authenticate(token string) (UserClaims, error) {
 	return claim, nil
 }
 
-// CREATE TABLE IF NOT EXISTS "token_codes" (
-//     token_code_id character varying(45) PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
-//     token_code_email character varying(200) NOT NULL,
-//     token_code_value character varying(6) NOT NULL,
-//     token_code_status character varying(45) NOT NULL DEFAULT 'active',
-//     token_code_created_at timestamp with time zone NOT NULL DEFAULT now(),
-//     token_code_updated_at timestamp with time zone NOT NULL DEFAULT now(),
-//     CONSTRAINT token_code_status_check CHECK (token_code_status IN ('active', 'inactive'))
-// )
-// WITH (
-//     OIDS = FALSE
-// );
-func (u *User) SaveCode(code string) error {
+func SaveEmailToConfirm(email string) (string, error) {
 	db := models.Connection
 
-	query := `INSERT INTO token_codes (token_code_email, token_code_value) VALUES ($1, $2)`
+	query := `INSERT INTO email_confirms (email_confirms_email) VALUES ($1) RETURNING email_confirms_id`
 
-	_, err := db.Exec(query, u.Email, code)
+	var emailConfirmID string
+
+	err := db.QueryRow(query, email).Scan(&emailConfirmID)
 
 	if err != nil {
-		return fmt.Errorf("error saving code: %s", err)
+		return "", fmt.Errorf("error saving email to confirm: %s", err)
+	}
+
+	return emailConfirmID, nil
+}
+
+func ConfirmEmail(id string) error {
+	db := models.Connection
+
+	var email string
+	query := `SELECT email_confirms_email FROM email_confirms WHERE email_confirms_id = $1`
+
+	err := db.QueryRow(query, id).Scan(&email)
+
+	if err != nil {
+		return fmt.Errorf("error confirming email: %s", err)
+	}
+
+	query = `UPDATE users SET user_status = $1 WHERE email = $2`
+
+	//transaction
+	tx, err := db.Begin()
+
+	if err != nil {
+		return fmt.Errorf("error confirming email transaction: %s", err)
+	}
+
+	_, err = tx.Exec(query, "active", email)
+
+	if err != nil {
+		tx.Rollback()
+		return fmt.Errorf("error confirming email set active: %s", err)
+	}
+
+	query = `DELETE FROM email_confirms WHERE email_confirms_id = $1`
+
+	_, err = tx.Exec(query, id)
+
+	if err != nil {
+		tx.Rollback()
+		return fmt.Errorf("error confirming email delete confirm: %s", err)
+	}
+
+	err = tx.Commit()
+
+	if err != nil {
+		return fmt.Errorf("error confirming email commit transaction: %s", err)
 	}
 
 	return nil

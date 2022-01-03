@@ -32,7 +32,8 @@ func main() {
 	router.PUT("/users", controllers.UpdateUser)
 	router.POST("/users/login", controllers.UserLogin)
 	router.GET("/users/auth", controllers.Authenticate)
-	router.POST("/users/code", controllers.CreateTokenCode)
+	router.POST("/users/register", controllers.Register)
+	router.GET("/confirm/:id", controllers.ConfirmEmail)
 
 	router.POST("/posts", controllers.CreatePost)
 	router.GET("/posts", controllers.GetPosts)
