@@ -34,6 +34,7 @@ func main() {
 	router.GET("/users/auth", controllers.Authenticate)
 	router.POST("/users/register", controllers.Register)
 	router.GET("/confirm/:id", controllers.ConfirmEmail)
+	router.POST("/contact", controllers.ContactEmail)
 
 	router.POST("/posts", controllers.CreatePost)
 	router.GET("/posts", controllers.GetPosts)

@@ -1,13 +1,19 @@
 package controllers
 
 import (
+	"bytes"
 	"fmt"
+	"html/template"
 	"net/http"
 	"yeric-blog/models"
 	"yeric-blog/utils"
 
 	"github.com/gin-gonic/gin"
 )
+
+type ConfirmLink struct {
+	Link string `json:"link"`
+}
 
 func CreateUser(g *gin.Context) {
 	user := models.User{}
@@ -175,11 +181,22 @@ func UserLogin(g *gin.Context) {
 	token, err := user.Login()
 
 	if err != nil {
+		var message string
+		switch e := err.(type) {
+		case *utils.ConfirmEmailError:
+			message = fmt.Sprintf("Error email not confirmed: %s", e.Error())
+		case *utils.CredentialsError:
+			message = fmt.Sprintf("Error invalid email or password: %s", e.Error())
+		default:
+			message = fmt.Sprintf("Error logging in: %s", e.Error())
+		}
+
 		resp := utils.JSONResponse{
 			Success: false,
-			Message: fmt.Sprintf("Error logging in user: %s", err.Error()),
+			Message: message,
 			Data:    nil,
 		}
+
 		g.JSON(http.StatusInternalServerError, resp)
 		fmt.Println(err)
 		return
@@ -266,7 +283,37 @@ func Register(g *gin.Context) {
 		return
 	}
 
-	err = models.SendMail("Confirm your email", fmt.Sprintf("http://localhost:7070/confirm/%s", id), user.Email)
+	t, err := template.ParseFiles("email/confirm_email.html")
+
+	if err != nil {
+		resp := utils.JSONResponse{
+			Success: false,
+			Message: fmt.Sprintf("Error parsing email template: %s", err.Error()),
+			Data:    nil,
+		}
+		g.JSON(http.StatusInternalServerError, resp)
+		fmt.Println(err)
+		return
+	}
+
+	buff := new(bytes.Buffer)
+
+	err = t.Execute(buff, ConfirmLink{
+		Link: fmt.Sprintf("http://localhost:7070/confirm/%s", id),
+	})
+
+	if err != nil {
+		resp := utils.JSONResponse{
+			Success: false,
+			Message: fmt.Sprintf("Error executing email template: %s", err.Error()),
+			Data:    nil,
+		}
+		g.JSON(http.StatusInternalServerError, resp)
+		fmt.Println(err)
+		return
+	}
+
+	err = models.SendMail("Yeric Blog, confirmar correo", buff.String(), user.Email)
 
 	if err != nil {
 		resp := utils.JSONResponse{

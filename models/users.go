@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 	models "yeric-blog/models/db"
+	"yeric-blog/utils"
 
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
@@ -195,20 +196,20 @@ func (u *User) Login() (string, error) {
 	err := db.QueryRow(query, u.Email).Scan(&u.ID, &u.Name, &u.Email, &u.Password, &u.Picture, &u.Status, &u.RoleID)
 
 	if err != nil {
-		return "", fmt.Errorf("error logging in: %s", err)
+		return "", utils.NewCustomError("credentials", fmt.Sprintf("error not found user: %s", err))
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(prevPass))
 
 	if err != nil {
-		return "", fmt.Errorf("error logging in: %s", err)
+		return "", utils.NewCustomError("credentials", fmt.Sprintf("error comparing password: %s", err))
 	}
 
 	if u.Status == "email_not_verified" {
-		return "", fmt.Errorf("error logging in: email not verified")
+		return "", utils.NewCustomError("confirm_email", fmt.Sprintf("error user email not verified: %s", err))
 	}
 	if u.Status == "inactive" {
-		return "", fmt.Errorf("error logging in: user is inactive")
+		return "", fmt.Errorf("error user is inactive")
 	}
 
 	u.Password = ""

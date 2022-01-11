@@ -112,6 +112,16 @@ WITH (
     OIDS = FALSE
 );
 
+CREATE TABLE IF NOT EXISTS "contacts" (
+    contacts_id character varying(45) PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    contacts_name character varying(200) NOT NULL,
+    contacts_email character varying(200) NOT NULL,
+    contacts_message text NOT NULL
+)
+WITH (
+    OIDS = FALSE
+);
+
 ALTER TABLE IF EXISTS "users"
     ADD FOREIGN KEY (user_role_id) 
     REFERENCES roles (role_id) MATCH SIMPLE
