@@ -24,7 +24,8 @@ func main() {
 	//router.Use(gin.Logger())
 
 	router.Static("/images", "./images")
-
+	//image size 1MB
+	router.MaxMultipartMemory = 1 << 20
 	router.POST("/users", controllers.CreateUser)
 	router.GET("/users", controllers.GetUsers)
 	router.GET("/users/id/:id", controllers.GetUserByID)
@@ -35,6 +36,7 @@ func main() {
 	router.POST("/users/register", controllers.Register)
 	router.GET("/confirm/:id", controllers.ConfirmEmail)
 	router.POST("/contact", controllers.ContactEmail)
+	router.POST("/users/upload", controllers.UploadUserPicture)
 
 	router.POST("/posts", controllers.CreatePost)
 	router.GET("/posts", controllers.GetPosts)

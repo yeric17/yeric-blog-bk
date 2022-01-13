@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"strings"
 	"yeric-blog/models"
 	"yeric-blog/utils"
 
@@ -362,4 +363,69 @@ func ConfirmEmail(g *gin.Context) {
 	}
 
 	g.Redirect(http.StatusMovedPermanently, "http://localhost:3000/login")
+}
+
+func UploadUserPicture(g *gin.Context) {
+	file, err := g.FormFile("file")
+	name := g.Query("name")
+
+	if name == "" {
+		resp := utils.JSONResponse{
+			Success: false,
+			Message: "Error uploading file: name is required",
+			Data:    nil,
+		}
+		g.JSON(http.StatusBadRequest, resp)
+		fmt.Println(err)
+		return
+	}
+
+	if err != nil {
+		resp := utils.JSONResponse{
+			Success: false,
+			Message: fmt.Sprintf("Error getting file: %s", err.Error()),
+			Data:    nil,
+		}
+		g.JSON(http.StatusInternalServerError, resp)
+		fmt.Println(err)
+		return
+	}
+
+	fileName := fmt.Sprintf("%s.%s", name, file.Filename[strings.LastIndex(file.Filename, ".")+1:])
+	err = g.SaveUploadedFile(file, "./images/users/"+fileName)
+
+	if err != nil {
+		resp := utils.JSONResponse{
+			Success: false,
+			Message: fmt.Sprintf("Error saving file: %s", err.Error()),
+			Data:    nil,
+		}
+		g.JSON(http.StatusInternalServerError, resp)
+		fmt.Println(err)
+		return
+	}
+
+	user := &models.User{
+		ID:      name,
+		Picture: fmt.Sprintf("http://localhost:7070/images/users/%s", fileName),
+	}
+
+	if err := user.Update(); err != nil {
+		resp := utils.JSONResponse{
+			Success: false,
+			Message: fmt.Sprintf("Error updating user: %s", err.Error()),
+			Data:    nil,
+		}
+		g.JSON(http.StatusInternalServerError, resp)
+		fmt.Println(err)
+		return
+	}
+
+	resp := utils.JSONResponse{
+		Success: true,
+		Message: "File uploaded",
+		Data:    nil,
+	}
+
+	g.JSON(http.StatusOK, resp)
 }
