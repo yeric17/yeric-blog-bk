@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"strings"
 	"time"
 	models "yeric-blog/models/db"
 )
@@ -24,6 +25,7 @@ type Post struct {
 	Title     string    `json:"title"`
 	Content   string    `json:"content"`
 	AuthorID  string    `json:"author_id"`
+	Image     string    `json:"image"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
@@ -149,6 +151,44 @@ func (p *PostResponse) GetPostByID(id string) error {
 
 	if err != nil {
 		return fmt.Errorf("error getting like count: %v", err)
+	}
+
+	return nil
+}
+
+func (p *Post) Update() error {
+	db := models.Connection
+
+	var args []interface{}
+	var instructions []string
+
+	if p.Title != "" {
+		instructions = append(instructions, fmt.Sprintf("post_title = $%d", len(args)+1))
+		args = append(args, p.Title)
+	}
+
+	if p.Content != "" {
+		instructions = append(instructions, fmt.Sprintf("post_content = $%d", len(args)+1))
+		args = append(args, p.Content)
+	}
+
+	if p.Image != "" {
+		instructions = append(instructions, fmt.Sprintf("post_image = $%d", len(args)+1))
+		args = append(args, p.Image)
+	}
+
+	if len(instructions) == 0 {
+		return fmt.Errorf("no fields to update")
+	}
+
+	query := fmt.Sprintf("UPDATE posts SET %s WHERE post_id = $%d", strings.Join(instructions, ", "), len(args)+1)
+
+	args = append(args, p.ID)
+
+	_, err := db.Exec(query, args...)
+
+	if err != nil {
+		return fmt.Errorf("error updating post: %v", err)
 	}
 
 	return nil
