@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS "users" (
     user_created_at timestamp with time zone NOT NULL DEFAULT now(),
     user_updated_at timestamp with time zone NOT NULL DEFAULT now(),
     PRIMARY KEY (user_id),
-    CONSTRAINT user_status_check CHECK (user_status IN ('active', 'inactive', 'email_not_verified')),
+    CONSTRAINT user_status_check CHECK (user_status IN ('active', 'inactive', 'email_not_verified'))
    
 ) 
 WITH (
@@ -69,25 +69,11 @@ WITH (
     OIDS = FALSE
 );
 
-CREATE TABLE IF NOT EXISTS "likes" (
-    like_id character varying(45) PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
-    like_entity_id character varying(45) NOT NULL,
-    like_user_id character varying(45) NOT NULL,
-    like_type character varying(45) NOT NULL,
-    like_created_at timestamp with time zone NOT NULL DEFAULT now(),
-    like_updated_at timestamp with time zone NOT NULL DEFAULT now(),
-    CONSTRAINT like_type_check CHECK (like_type IN ('post', 'comment')),
-    CONSTRAINT like_user_id_unique UNIQUE (like_user_id, like_entity_id, like_type)
-)
-WITH (
-    OIDS = FALSE
-);
 
 CREATE TABLE IF NOT EXISTS "comments" (
     comment_id character varying(45) PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     comment_content text NOT NULL,
     comment_post_id character varying(45) NOT NULL,
-    comment_comment_id character varying(45),
     comment_user_id character varying(45) NOT NULL,
     comment_type character varying(45) NOT NULL,
     comment_status character varying(45) NOT NULL DEFAULT 'active',
@@ -95,6 +81,16 @@ CREATE TABLE IF NOT EXISTS "comments" (
     comment_updated_at timestamp with time zone NOT NULL DEFAULT now(),
     CONSTRAINT comment_type_check CHECK (comment_type IN ('post', 'comment')),
     CONSTRAINT comment_status_check CHECK (comment_status IN ('active', 'inactive', 'blocked'))
+)
+WITH (
+    OIDS = FALSE
+);
+
+CREATE TABLE IF NOT EXISTS "parent_child_comments" (
+    parent_child_comments_id character varying(45) PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+    parent_child_comments_parent_id character varying(45) NOT NULL,
+    parent_child_comments_child_id character varying(45) NOT NULL,
+    CONSTRAINT parent_child_comments_parent_id_unique UNIQUE (parent_child_comments_parent_id, parent_child_comments_child_id)
 )
 WITH (
     OIDS = FALSE
@@ -138,13 +134,18 @@ ALTER TABLE IF EXISTS "comments"
     ON UPDATE NO ACTION
     ON DELETE SET NULL;
 ALTER TABLE IF EXISTS "comments"
-    ADD FOREIGN KEY (comment_comment_id) 
+    ADD FOREIGN KEY (comment_user_id) 
+    REFERENCES users (user_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE SET NULL;
+ALTER TABLE IF EXISTS "parent_child_comments"
+    ADD FOREIGN KEY (parent_child_comments_parent_id) 
     REFERENCES comments (comment_id) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE SET NULL;
-ALTER TABLE IF EXISTS "comments"
-    ADD FOREIGN KEY (comment_user_id) 
-    REFERENCES users (user_id) MATCH SIMPLE
+ALTER TABLE IF EXISTS "parent_child_comments"
+    ADD FOREIGN KEY (parent_child_comments_child_id) 
+    REFERENCES comments (comment_id) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE SET NULL;
 ALTER TABLE IF EXISTS "tags_posts"
@@ -157,15 +158,11 @@ ALTER TABLE IF EXISTS "tags_posts"
     REFERENCES posts (post_id) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE SET NULL;
-ALTER TABLE IF EXISTS "likes"
-    ADD FOREIGN KEY (like_user_id) 
-    REFERENCES users (user_id) MATCH SIMPLE
-    ON UPDATE NO ACTION
-    ON DELETE SET NULL;
 
 
 INSERT INTO roles(role_id, role_name, role_status) VALUES(1,'admin', 'active');
-INSERT INTO roles(role_id, role_name, role_status) VALUES(2,'general', 'active');
+INSERT INTO roles(role_id, role_name, role_status) VALUES(2,'publisher', 'active');
+INSERT INTO roles(role_id, role_name, role_status) VALUES(3,'general', 'active');
 
 INSERT INTO tags(tag_id, tag_name) VALUES(1,'javascript');
 INSERT INTO tags(tag_id, tag_name) VALUES(2,'svelte');

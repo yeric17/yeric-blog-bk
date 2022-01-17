@@ -1,10 +1,10 @@
 version: '3'
 services:
   app:
-    container_name: yeric-blog-app
+    container_name: yeric-blog-api
     build: .
     ports:
-      - '8585:8585'
+      - '7070:7070'
     restart: on-failure
     volumes:
       - api:/usr/src/app/
@@ -14,7 +14,7 @@ services:
       - fullstack
     
   fullstack-postgres:
-    image: postgres:9.6
+    image: postgres:14.1-alpine
     container_name: yeric-blog-postgres
     environment:
       - POSTGRES_USER=${DB_USER}
@@ -23,7 +23,7 @@ services:
       - DATABASE_HOST=${DB_HOST}
       - PGDATA=/var/lib/postgresql/data
     ports:
-      - '5432:5432'
+      - '5433:5433'
     networks:
       - fullstack
 volumes:
