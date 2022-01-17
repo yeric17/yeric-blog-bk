@@ -312,3 +312,17 @@ func ConfirmEmail(id string) error {
 
 	return nil
 }
+
+func (u *User) Delete() error {
+	db := models.Connection
+
+	query := `DELETE FROM users WHERE user_id = $1`
+
+	_, err := db.Exec(query, u.ID)
+
+	if err != nil {
+		return fmt.Errorf("error deleting user: %s", err)
+	}
+
+	return nil
+}

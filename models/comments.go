@@ -26,23 +26,21 @@ type Comment struct {
 	AuthorID   string    `json:"author_id"`
 	Content    string    `json:"content"`
 	PostID     string    `json:"post_id"`
-	CommentID  string    `json:"comment_id"`
 	EntityType string    `json:"entity_type"`
 	CreatedAt  time.Time `json:"created_at,omitempty"`
 	UpdatedAt  time.Time `json:"updated_at,omitempty"`
 }
 
 type CommentResponse struct {
-	ID         string         `json:"id"`
-	Author     Author         `json:"author"`
-	Content    string         `json:"content"`
-	PostID     string         `json:"post_id"`
-	CommentID  string         `json:"comment_id"`
-	Comments   ChildComments  `json:"comments"`
-	Likes      []LikeResponse `json:"likes"`
-	EntityType string         `json:"entity_type"`
-	CreatedAt  time.Time      `json:"created_at,omitempty"`
-	UpdatedAt  time.Time      `json:"updated_at,omitempty"`
+	ID       string        `json:"id"`
+	Author   Author        `json:"author"`
+	Content  string        `json:"content"`
+	PostID   string        `json:"post_id"`
+	Comments ChildComments `json:"comments"`
+	// Likes      []LikeResponse `json:"likes"`
+	EntityType string    `json:"entity_type"`
+	CreatedAt  time.Time `json:"created_at,omitempty"`
+	UpdatedAt  time.Time `json:"updated_at,omitempty"`
 }
 
 type ChildComments struct {
@@ -68,21 +66,14 @@ type ChildComments struct {
 func (c *Comment) Create() error {
 	db := models.Connection
 
-	query := `INSERT INTO comments (comment_content, comment_post_id, comment_comment_id, comment_user_id, comment_type) VALUES ($1, $2, $3, $4, $5) RETURNING comment_id, comment_created_at, comment_updated_at`
+	query := `INSERT INTO comments (comment_content, comment_post_id, comment_user_id, comment_type) VALUES ($1, $2, $3, $4) RETURNING comment_id, comment_created_at, comment_updated_at`
 
 	var err error
 	if c.EntityType == "" {
 		return fmt.Errorf("entity type is required")
 	}
 
-	nullCommentID := sql.NullString{}
-
-	if c.CommentID != "" {
-		nullCommentID.String = c.CommentID
-		nullCommentID.Valid = true
-	}
-
-	err = db.QueryRow(query, c.Content, c.PostID, nullCommentID, c.AuthorID, c.EntityType).Scan(&c.ID, &c.CreatedAt, &c.UpdatedAt)
+	err = db.QueryRow(query, c.Content, c.PostID, c.AuthorID, c.EntityType).Scan(&c.ID, &c.CreatedAt, &c.UpdatedAt)
 
 	if err != nil {
 		return fmt.Errorf("error creating comment: %s", err)
@@ -103,8 +94,10 @@ func (c *ChildComments) GetChildComments(entityType string, postID string, comme
 		query = `SELECT COUNT(*) FROM comments WHERE comment_post_id = $1`
 		err = db.QueryRow(query, postID).Scan(&c.Count)
 	} else {
-		query = `SELECT COUNT(*) FROM comments WHERE comment_comment_id = $1 AND comment_post_id = $2`
-		err = db.QueryRow(query, commentID, postID).Scan(&c.Count)
+		query = `SELECT COUNT(*) FROM comments 
+		LEFT join parent_child_comments ON parent_child_comments_parent_id = comments.comment_id
+		WHERE comment_post_id = $1`
+		err = db.QueryRow(query, postID).Scan(&c.Count)
 	}
 
 	if err != nil {
@@ -130,17 +123,17 @@ func (c *CommentResponse) GetComments(entityType string, postID string, commentI
 	var rows *sql.Rows
 
 	if entityType == "post" {
-		query = `SELECT comment_id, comment_content, comment_user_id, user_name, user_picture, comment_post_id, comment_comment_id, comment_type, comment_created_at, comment_updated_at FROM comments 
+		query = `SELECT comment_id, comment_content, comment_user_id, user_name, user_picture, comment_post_id, comment_type, comment_created_at, comment_updated_at FROM comments 
 		LEFT JOIN users ON comments.comment_user_id = users.user_id
 		WHERE comment_post_id = $1 AND comment_type = 'post' ORDER BY comment_created_at DESC`
 		rows, err = db.Query(query, postID)
 
 	} else {
-		query = `SELECT comment_id, comment_content, comment_user_id, user_name, user_picture, comment_post_id, comment_comment_id, comment_type, comment_created_at, comment_updated_at FROM comments 
+		query = `SELECT comment_id, comment_content, comment_user_id, user_name, user_picture, comment_post_id, comment_type, comment_created_at, comment_updated_at FROM comments 
 		LEFT JOIN users ON comments.comment_user_id = users.user_id
-		WHERE comment_comment_id = $1 AND comment_post_id = $2 AND comment_type = 'comment' ORDER BY comment_created_at DESC`
+		WHERE comment_post_id = $1 AND comment_type = 'comment' ORDER BY comment_created_at DESC`
 
-		rows, err = db.Query(query, commentID, postID)
+		rows, err = db.Query(query, postID)
 	}
 
 	if err != nil {
@@ -154,30 +147,24 @@ func (c *CommentResponse) GetComments(entityType string, postID string, commentI
 	for rows.Next() {
 		var comment CommentResponse
 
-		var nullCommentID sql.NullString
-
-		err := rows.Scan(&comment.ID, &comment.Content, &comment.Author.ID, &comment.Author.Name, &comment.Author.Picture, &comment.PostID, &nullCommentID, &comment.EntityType, &comment.CreatedAt, &comment.UpdatedAt)
+		err := rows.Scan(&comment.ID, &comment.Content, &comment.Author.ID, &comment.Author.Name, &comment.Author.Picture, &comment.PostID, &comment.EntityType, &comment.CreatedAt, &comment.UpdatedAt)
 
 		if err != nil {
 			return nil, fmt.Errorf("error scanning comment: %s", err)
 		}
 
-		if nullCommentID.Valid {
-			comment.CommentID = nullCommentID.String
-		}
-
 		//fmt.Printf("comment: %+v\n", comment)
 
 		//get likes
-		like := &LikeResponse{}
+		// like := &LikeResponse{}
 
-		likes, err := like.GetLikes(comment.ID, "comment")
+		// likes, err := like.GetLikes(comment.ID, "comment")
 
-		if err != nil {
-			return nil, fmt.Errorf("error getting likes: %s", err)
-		}
+		// if err != nil {
+		// 	return nil, fmt.Errorf("error getting likes: %s", err)
+		// }
 
-		comment.Likes = likes
+		// comment.Likes = likes
 
 		//get comments
 
@@ -215,20 +202,14 @@ func (c *Comment) AddCommentLike() error {
 func (c *CommentResponse) GetCommentByID(commentID string) error {
 	db := models.Connection
 
-	query := `SELECT comment_id, comment_content, comment_user_id, user_name, user_picture, comment_post_id, comment_comment_id, comment_type, comment_created_at, comment_updated_at FROM comments 
+	query := `SELECT comment_id, comment_content, comment_user_id, user_name, user_picture, comment_post_id, comment_type, comment_created_at, comment_updated_at FROM comments 
 	LEFT JOIN users ON comments.comment_user_id = users.user_id
 	WHERE comment_id = $1`
 
-	nullCommentID := sql.NullString{}
-
-	err := db.QueryRow(query, commentID).Scan(&c.ID, &c.Content, &c.Author.ID, &c.Author.Name, &c.Author.Picture, &c.PostID, &nullCommentID, &c.EntityType, &c.CreatedAt, &c.UpdatedAt)
+	err := db.QueryRow(query, commentID).Scan(&c.ID, &c.Content, &c.Author.ID, &c.Author.Name, &c.Author.Picture, &c.PostID, &c.EntityType, &c.CreatedAt, &c.UpdatedAt)
 
 	if err != nil {
 		return fmt.Errorf("error getting comment: %s", err)
-	}
-
-	if nullCommentID.Valid {
-		c.CommentID = nullCommentID.String
 	}
 
 	return nil

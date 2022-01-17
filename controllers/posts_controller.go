@@ -166,6 +166,16 @@ func GetComments(g *gin.Context) {
 		return
 	}
 
+	if post_id == "" {
+		resp := &utils.JSONResponse{
+			Success: false,
+			Message: "Invalid post id",
+			Data:    nil,
+		}
+		g.JSON(http.StatusBadRequest, resp)
+		return
+	}
+
 	comment := models.CommentResponse{}
 
 	comments, err := comment.GetComments(entity_type, post_id, comment_id)
