@@ -24,6 +24,6 @@ WORKDIR /root/
 COPY --from=builder /app/yeric-blog .
 COPY --from=builder /app/.env .
 
-EXPOSE 8080
+EXPOSE 7070
 
 CMD [ "./yeric-blog" ]

@@ -19,7 +19,7 @@ jobs:
           POSTGRES_PASSWORD: cirey.anaid.2107
           POSTGRES_DB: yeric-blog
         ports:
-          - 5433:5433
+          - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
