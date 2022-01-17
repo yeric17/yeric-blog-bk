@@ -29,7 +29,7 @@ func TestCreateAndDeleteUser(t *testing.T) {
 	}
 
 	if user.Password != "123456" {
-		t.Errorf("User password is not same")
+		t.Errorf("User password is not sames")
 	}
 
 	err = user.Delete()
