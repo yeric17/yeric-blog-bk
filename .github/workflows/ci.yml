@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:14.1-alpine3.15
+        image: postgres:12
         env:
           POSTGRES_USER: root
           POSTGRES_PASSWORD: cirey.anaid.2107
