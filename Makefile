@@ -8,7 +8,7 @@ dropdb:
 	docker exec -it postgres14_1 dropdb yeric-blog
 
 migrateup:
-	migrate -path models/db/migration -database "postgresql://root:cirey.anaid.2107@localhost:5433/yeric-blog?sslmode=disable" up;
+	migrate -path models/db/migration -database "postgresql://root:cirey.anaid.2107@localhost:5433/yeric-blog?sslmode=disable" up
 
 migratedown:
 	migrate -path models/db/migration -database "postgresql://root:cirey.anaid.2107@localhost:5433/yeric-blog?sslmode=disable" -verbose down
