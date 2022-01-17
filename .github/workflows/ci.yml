@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:14.1
+        image: postgres:14.1-alpine3.15
         env:
           POSTGRES_USER: root
           POSTGRES_PASSWORD: cirey.anaid.2107
@@ -23,7 +23,7 @@ jobs:
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
-          --health-timeout 5s
+          --health-timeout 10s
           --health-retries 5
     steps:
     - uses: actions/checkout@v2
