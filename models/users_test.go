@@ -1,12 +1,11 @@
-package tests
+package models
 
 import (
 	"testing"
-	"yeric-blog/models"
 )
 
 func TestCreateAndDeleteUser(t *testing.T) {
-	user := &models.User{}
+	user := &User{}
 	user.Name = "Test"
 	user.Email = "correo@inventado.com"
 	user.Password = "123456"
