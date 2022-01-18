@@ -16,7 +16,7 @@ jobs:
         image: postgres:12
         env:
           POSTGRES_USER: root
-          POSTGRES_PASSWORD: uT4i%1E8GvS8
+          POSTGRES_PASSWORD: 1234567
           POSTGRES_DB: yeric-blog
         ports:
           - 5433:5432

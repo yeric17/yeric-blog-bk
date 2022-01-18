@@ -26,7 +26,7 @@ func init() {
 	if MODE == "dev" {
 		fmt.Println("Running in development mode")
 		DB_USER = "root"
-		DB_PASS = "uT4i%1E8GvS8"
+		DB_PASS = "1234567"
 		DB_NAME = "yeric-blog"
 		DB_HOST = "localhost"
 		DB_PORT = "5433"
