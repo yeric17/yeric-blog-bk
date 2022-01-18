@@ -191,7 +191,7 @@ func (c *CommentResponse) GetComments(entityType string, parentID string) ([]Com
 	var rows *sql.Rows
 
 	if entityType == "comment" {
-		query = `SELECT comment_id, comment_content, comment_post_id, comment_type, comment_user_id, user_name, user_picture FROM comments
+		query = `SELECT comment_id, comment_content, comment_post_id, comment_type, comment_created_at, comment_user_id, user_name, user_picture FROM comments
 		LEFT JOIN parent_child_comments ON comment_id = parent_child_comments_child_id
 		LEFT JOIN users ON user_id = comment_user_id
 		WHERE parent_child_comments_parent_id = $1`
@@ -199,7 +199,7 @@ func (c *CommentResponse) GetComments(entityType string, parentID string) ([]Com
 		rows, err = db.Query(query, parentID)
 	}
 	if entityType == "post" {
-		query = `SELECT comment_id, comment_content, comment_post_id, comment_type, comment_user_id, user_name, user_picture FROM comments
+		query = `SELECT comment_id, comment_content, comment_post_id, comment_type, comment_created_at, comment_user_id, user_name, user_picture FROM comments
 		LEFT JOIN users ON user_id = comment_user_id
 		WHERE comment_post_id = $1 AND comment_type = 'post'`
 
@@ -217,7 +217,7 @@ func (c *CommentResponse) GetComments(entityType string, parentID string) ([]Com
 	for rows.Next() {
 		var comment CommentResponse
 
-		err := rows.Scan(&comment.ID, &comment.Content, &comment.PostID, &comment.EntityType, &comment.Author.ID, &comment.Author.Name, &comment.Author.Picture)
+		err := rows.Scan(&comment.ID, &comment.Content, &comment.PostID, &comment.EntityType, &comment.CreatedAt, &comment.Author.ID, &comment.Author.Name, &comment.Author.Picture)
 
 		if err != nil {
 			return nil, fmt.Errorf("error scanning comment: %s", err)
