@@ -30,15 +30,14 @@ type Post struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 type PostResponse struct {
-	ID        string         `json:"id"`
-	Title     string         `json:"title"`
-	Content   string         `json:"content"`
-	Author    Author         `json:"author"`
-	Comments  ChildComments  `json:"comments"`
-	Likes     []LikeResponse `json:"likes"`
-	Image     string         `json:"image"`
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
+	ID        string        `json:"id"`
+	Title     string        `json:"title"`
+	Content   string        `json:"content"`
+	Author    Author        `json:"author"`
+	Comments  ChildComments `json:"comments"`
+	Image     string        `json:"image"`
+	CreatedAt time.Time     `json:"created_at"`
+	UpdatedAt time.Time     `json:"updated_at"`
 }
 
 type Author struct {
@@ -98,9 +97,6 @@ func (p *Post) GetPosts() ([]PostResponse, error) {
 
 		post.Comments = comment
 
-		like := &LikeResponse{}
-		post.Likes, err = like.GetLikes(post.ID, "post")
-
 		if err != nil {
 			return nil, fmt.Errorf("error getting like count: %v", err)
 		}
@@ -109,17 +105,6 @@ func (p *Post) GetPosts() ([]PostResponse, error) {
 	}
 
 	return posts, nil
-}
-
-func (p *Post) AddPostLike(like Like) error {
-
-	err := like.Create()
-
-	if err != nil {
-		return fmt.Errorf("error creating like: %v", err)
-	}
-
-	return nil
 }
 
 func (p *PostResponse) GetPostByID(id string) error {
@@ -145,9 +130,6 @@ func (p *PostResponse) GetPostByID(id string) error {
 	}
 
 	p.Comments = *comment
-
-	like := &LikeResponse{}
-	p.Likes, err = like.GetLikes(p.ID, "post")
 
 	if err != nil {
 		return fmt.Errorf("error getting like count: %v", err)

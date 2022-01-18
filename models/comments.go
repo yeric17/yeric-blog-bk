@@ -153,21 +153,6 @@ func (c *CommentResponse) GetComments(entityType string, postID string, commentI
 			return nil, fmt.Errorf("error scanning comment: %s", err)
 		}
 
-		//fmt.Printf("comment: %+v\n", comment)
-
-		//get likes
-		// like := &LikeResponse{}
-
-		// likes, err := like.GetLikes(comment.ID, "comment")
-
-		// if err != nil {
-		// 	return nil, fmt.Errorf("error getting likes: %s", err)
-		// }
-
-		// comment.Likes = likes
-
-		//get comments
-
 		childComments := &ChildComments{}
 		err = childComments.GetChildComments("comment", comment.PostID, comment.ID)
 
@@ -181,22 +166,6 @@ func (c *CommentResponse) GetComments(entityType string, postID string, commentI
 	}
 
 	return comments, nil
-}
-
-func (c *Comment) AddCommentLike() error {
-	like := &Like{
-		EntityID:   c.ID,
-		EntityType: "comment",
-		AuthorID:   c.AuthorID,
-	}
-
-	err := like.Create()
-
-	if err != nil {
-		return fmt.Errorf("error creating like: %s", err)
-	}
-
-	return nil
 }
 
 func (c *CommentResponse) GetCommentByID(commentID string) error {

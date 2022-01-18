@@ -62,38 +62,6 @@ func GetPosts(g *gin.Context) {
 	g.JSON(http.StatusOK, reps)
 }
 
-func AddLike(g *gin.Context) {
-	like := models.Like{}
-
-	if err := g.BindJSON(&like); err != nil {
-		reps := &utils.JSONResponse{
-			Success: false,
-			Message: "Invalid like data; " + err.Error(),
-			Data:    nil,
-		}
-		g.JSON(http.StatusBadRequest, reps)
-		return
-	}
-
-	if err := like.Create(); err != nil {
-		reps := &utils.JSONResponse{
-			Success: false,
-			Message: "Error creating like; " + err.Error(),
-			Data:    nil,
-		}
-		g.JSON(http.StatusInternalServerError, reps)
-		return
-	}
-
-	reps := &utils.JSONResponse{
-		Success: true,
-		Message: "Like created successfully",
-		Data:    like,
-	}
-
-	g.JSON(http.StatusCreated, reps)
-}
-
 func CreateComment(g *gin.Context) {
 	comment := models.Comment{}
 

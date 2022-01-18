@@ -40,7 +40,6 @@ func main() {
 
 	router.POST("/posts", controllers.CreatePost)
 	router.GET("/posts", controllers.GetPosts)
-	router.POST("/posts/like", controllers.AddLike)
 	router.POST("/posts/comment", controllers.CreateComment)
 	router.GET("/posts/id/:id", controllers.GetPostByID)
 	router.GET("/comments", controllers.GetComments)
