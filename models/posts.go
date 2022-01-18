@@ -87,18 +87,10 @@ func (p *Post) GetPosts() ([]PostResponse, error) {
 			return nil, fmt.Errorf("error scanning posts: %v", err)
 		}
 
-		comment := ChildComments{}
-
-		err = comment.GetChildComments("post", post.ID, "")
+		post.GetComments()
 
 		if err != nil {
 			return nil, fmt.Errorf("error getting comments: %v", err)
-		}
-
-		post.Comments = comment
-
-		if err != nil {
-			return nil, fmt.Errorf("error getting like count: %v", err)
 		}
 
 		posts = append(posts, post)
@@ -123,7 +115,7 @@ func (p *PostResponse) GetPostByID(id string) error {
 
 	comment := &ChildComments{}
 
-	err = comment.GetChildComments("post", p.ID, "")
+	err = comment.GetPostChildComments(p.ID)
 
 	if err != nil {
 		return fmt.Errorf("error getting comments: %v", err)
@@ -174,4 +166,24 @@ func (p *Post) Update() error {
 	}
 
 	return nil
+}
+
+func (p *PostResponse) GetComments() error {
+	db := models.Connection
+
+	var query string
+	var err error
+
+	query = `SELECT COUNT(*) FROM comments WHERE comment_post_id = $1`
+	err = db.QueryRow(query, p.ID).Scan(&p.Comments.Count)
+
+	if err != nil {
+		return fmt.Errorf("error getting child comments: %s", err)
+	}
+
+	if p.Comments.Count > 0 {
+		p.Comments.Link = fmt.Sprintf("http://localhost:7070/comments?entity_type=post&parent_id=%s", p.ID)
+	}
+	return nil
+
 }

@@ -118,8 +118,7 @@ func GetPostByID(g *gin.Context) {
 }
 
 func GetComments(g *gin.Context) {
-	post_id := g.Query("post_id")
-	comment_id := g.Query("comment_id")
+	parent_id := g.Query("parent_id")
 	entity_type := g.Query("entity_type")
 
 	//fmt.Printf("post_id: %s; comment_id: %s; entity_type: %s\n", post_id, comment_id, entity_type)
@@ -134,7 +133,7 @@ func GetComments(g *gin.Context) {
 		return
 	}
 
-	if post_id == "" {
+	if parent_id == "" {
 		resp := &utils.JSONResponse{
 			Success: false,
 			Message: "Invalid post id",
@@ -146,7 +145,7 @@ func GetComments(g *gin.Context) {
 
 	comment := models.CommentResponse{}
 
-	comments, err := comment.GetComments(entity_type, post_id, comment_id)
+	comments, err := comment.GetComments(entity_type, parent_id)
 
 	if err != nil {
 		reps := &utils.JSONResponse{
