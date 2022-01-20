@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"yeric-blog/config"
 	"yeric-blog/models"
 	"yeric-blog/utils"
 
@@ -30,6 +31,7 @@ func CreatePost(g *gin.Context) {
 			Data:    nil,
 		}
 		g.JSON(http.StatusInternalServerError, reps)
+		fmt.Printf("%+v\n", err)
 		return
 	}
 
@@ -225,27 +227,11 @@ func UploadPostImage(g *gin.Context) {
 		fmt.Println(err)
 		return
 	}
-	//Todo - save file name to database
-	// post := &models.Post{
-	// 	ID:    name,
-	// 	Image: fmt.Sprintf("http://localhost:7070/images/posts/%s", fileName),
-	// }
-
-	// if err := user.Update(); err != nil {
-	// 	resp := utils.JSONResponse{
-	// 		Success: false,
-	// 		Message: fmt.Sprintf("Error updating post: %s", err.Error()),
-	// 		Data:    nil,
-	// 	}
-	// 	g.JSON(http.StatusInternalServerError, resp)
-	// 	fmt.Println(err)
-	// 	return
-	// }
 
 	resp := utils.JSONResponse{
 		Success: true,
 		Message: "File uploaded",
-		Data:    nil,
+		Data:    "http://localhost:" + config.APP_PORT + "/images/posts/" + fileName,
 	}
 
 	g.JSON(http.StatusOK, resp)

@@ -50,8 +50,7 @@ WITH (
 CREATE TABLE IF NOT EXISTS "tags_posts" (
     tags_posts_id character varying(45) PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
     tags_posts_tag_id int NOT NULL,
-    tags_posts_post_id character varying(45) NOT NULL,
-    tag_name character varying(200) NOT NULL UNIQUE
+    tags_posts_post_id character varying(45) NOT NULL
 )
 WITH (
     OIDS = FALSE

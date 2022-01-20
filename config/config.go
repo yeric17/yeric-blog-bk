@@ -36,6 +36,7 @@ func init() {
 		Mail.Port = 587
 		Mail.Username = "mail.manager.cf2345181@gmail.com"
 		Mail.Password = "cF6XN$ozi0b3"
+		Mail.From = "mail.manager.cf2345181@gmail.com"
 	} else {
 		fmt.Println("Running in production mode")
 		DB_USER = os.Getenv("DB_USER")

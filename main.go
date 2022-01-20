@@ -13,6 +13,7 @@ func main() {
 	router := gin.Default()
 
 	//cors policy gin config
+	router.SetTrustedProxies([]string{"http://localhost:3000"})
 	router.Use(corsgin.New(corsgin.Config{
 		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
@@ -44,6 +45,7 @@ func main() {
 	router.GET("/posts/id/:id", controllers.GetPostByID)
 	router.GET("/comments", controllers.GetComments)
 	router.GET("/comments/id/:id", controllers.GetCommentByID)
+	router.POST("/posts/upload", controllers.UploadPostImage)
 
 	router.Run(":" + config.APP_PORT)
 

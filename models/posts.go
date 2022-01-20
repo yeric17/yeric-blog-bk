@@ -30,14 +30,15 @@ type Post struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 type PostResponse struct {
-	ID        string        `json:"id"`
-	Title     string        `json:"title"`
-	Content   string        `json:"content"`
-	Author    Author        `json:"author"`
-	Comments  ChildComments `json:"comments"`
-	Image     string        `json:"image"`
-	CreatedAt time.Time     `json:"created_at"`
-	UpdatedAt time.Time     `json:"updated_at"`
+	ID         string        `json:"id"`
+	Title      string        `json:"title"`
+	Content    string        `json:"content"`
+	Author     Author        `json:"author"`
+	Comments   ChildComments `json:"comments"`
+	Image      string        `json:"image"`
+	Categories []string      `json:"categories"`
+	CreatedAt  time.Time     `json:"created_at"`
+	UpdatedAt  time.Time     `json:"updated_at"`
 }
 
 type Author struct {
@@ -49,9 +50,13 @@ type Author struct {
 func (p *Post) Create() error {
 	db := models.Connection
 
-	query := `INSERT INTO posts (post_title, post_content, post_author_id) VALUES ($1, $2, $3) RETURNING post_id, post_created_at, post_updated_at`
+	query := `INSERT INTO posts (post_title, post_content, post_author_id, post_image) VALUES ($1, $2, $3, $4) RETURNING post_id, post_created_at, post_updated_at, post_image`
 
-	err := db.QueryRow(query, p.Title, p.Content, p.AuthorID).Scan(&p.ID, &p.CreatedAt, &p.UpdatedAt)
+	if p.Image == "" {
+		p.Image = "http://localhost:7070/images/default_image.png"
+	}
+
+	err := db.QueryRow(query, p.Title, p.Content, p.AuthorID, p.Image).Scan(&p.ID, &p.CreatedAt, &p.UpdatedAt, &p.Image)
 
 	if err != nil {
 		return fmt.Errorf("error creating post: %v", err)
@@ -86,6 +91,34 @@ func (p *Post) GetPosts() ([]PostResponse, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error scanning posts: %v", err)
 		}
+
+		queryTypes := `SELECT tag_name FROM tags_posts
+		LEFT JOIN tags ON tag_id = tags_posts_tag_id
+		WHERE tags_posts_post_id = $1 and tag_status = 'active'`
+
+		rowsTypes, err := db.Query(queryTypes, post.ID)
+
+		if err != nil {
+			return nil, fmt.Errorf("error getting post types: %v", err)
+		}
+
+		defer rowsTypes.Close()
+
+		var types []string
+
+		for rowsTypes.Next() {
+			var typeName string
+
+			err := rowsTypes.Scan(&typeName)
+
+			if err != nil {
+				return nil, fmt.Errorf("error scanning post types: %v", err)
+			}
+
+			types = append(types, typeName)
+		}
+
+		post.Categories = types
 
 		post.GetComments()
 
