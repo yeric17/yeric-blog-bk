@@ -48,5 +48,9 @@ jobs:
 
     - name: Test
       run: go test -v ./...
-    - name: run app
+
+    - name: Build app
+      run: go build
+    
+    - name: Run app
       run: ./yeric-blog
