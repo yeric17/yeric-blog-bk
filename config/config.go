@@ -28,8 +28,8 @@ func init() {
 		DB_USER = "root"
 		DB_PASS = "1234567"
 		DB_NAME = "yeric-blog"
-		DB_HOST = "localhost"
-		DB_PORT = "5433"
+		DB_HOST = "database"
+		DB_PORT = "5432"
 		DB_DRIVER = "postgres"
 		APP_PORT = "7070"
 		Mail.Host = "smtp.gmail.com"
@@ -37,8 +37,9 @@ func init() {
 		Mail.Username = "mail.manager.cf2345181@gmail.com"
 		Mail.Password = "cF6XN$ozi0b3"
 		Mail.From = "mail.manager.cf2345181@gmail.com"
+
 	} else {
-		fmt.Println("Running in production mode")
+		fmt.Println("Running in production mode 4")
 		DB_USER = os.Getenv("DB_USER")
 		DB_PASS = os.Getenv("DB_PASS")
 		DB_NAME = os.Getenv("DB_NAME")

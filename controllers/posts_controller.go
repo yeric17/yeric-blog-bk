@@ -86,6 +86,7 @@ func CreateComment(g *gin.Context) {
 			Data:    nil,
 		}
 		g.JSON(http.StatusInternalServerError, reps)
+		fmt.Printf("%+v\n", err)
 		return
 	}
 
@@ -234,5 +235,27 @@ func UploadPostImage(g *gin.Context) {
 		Data:    "http://localhost:" + config.APP_PORT + "/images/posts/" + fileName,
 	}
 
+	g.JSON(http.StatusOK, resp)
+}
+
+func GetPostsCategories(g *gin.Context) {
+
+	categories, err := models.GetPostsCategories()
+
+	if err != nil {
+		reps := &utils.JSONResponse{
+			Success: false,
+			Message: "Error getting posts categories; " + err.Error(),
+			Data:    nil,
+		}
+		g.JSON(http.StatusNotFound, reps)
+		return
+	}
+
+	resp := &utils.JSONResponse{
+		Success: true,
+		Message: "Posts categories retrieved successfully",
+		Data:    categories,
+	}
 	g.JSON(http.StatusOK, resp)
 }

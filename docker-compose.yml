@@ -1,23 +1,10 @@
-version: '3'
-services:
-  app:
-    container_name: yeric-blog-api
-    build:
-      dockerfile: Dockerfile
-      context: .
-    ports:
-      - '7070:7070'
-    restart: on-failure
-    volumes:
-      - api:/usr/src/app/
-    depends_on:
-      - fullstack-postgres
-    networks:
-      - fullstack
-    
-  fullstack-postgres:
+version: '3.7'
+services:    
+  database:
+    container_name: database
+    env_file: .env
     image: postgres:14.1-alpine3.15
-    container_name: postgres14_1
+    restart: always
     environment:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASS}
@@ -25,13 +12,22 @@ services:
       - DATABASE_HOST=${DB_HOST}
       - PGDATA=/var/lib/postgresql/data
     ports:
-      - '5433:5432'
-    networks:
-      - fullstack
+      - "5433:5432"
+    volumes:
+      - data:/var/lib/postgresql/data
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: app
+    env_file: .env
+    image: yeric-blog-app:v0.0.1
+    ports:
+      - "7070:7070"
+    depends_on:
+      - database
+    restart: always
+    volumes:
+      - data:/images
 volumes:
-  api:
-  database_postgres:                  
-
-networks:
-  fullstack:
-    driver: bridge
+  data:

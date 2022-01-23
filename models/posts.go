@@ -47,6 +47,11 @@ type Author struct {
 	Picture string `json:"picture"`
 }
 
+type Category struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
+
 func (p *Post) Create() error {
 	db := models.Connection
 
@@ -218,5 +223,38 @@ func (p *PostResponse) GetComments() error {
 		p.Comments.Link = fmt.Sprintf("http://localhost:7070/comments?entity_type=post&parent_id=%s", p.ID)
 	}
 	return nil
+
+}
+
+func GetPostsCategories() ([]Category, error) {
+	db := models.Connection
+
+	query := `SELECT DISTINCT tags_posts_tag_id, tag_name FROM tags_posts
+	LEFT JOIN tags ON tag_id = tags_posts_tag_id
+	WHERE tag_status = 'active'`
+
+	rows, err := db.Query(query)
+
+	if err != nil {
+		return nil, fmt.Errorf("error getting posts categories: %v", err)
+	}
+
+	defer rows.Close()
+
+	var categories []Category
+
+	for rows.Next() {
+		var category Category
+
+		err := rows.Scan(&category.ID, &category.Name)
+
+		if err != nil {
+			return nil, fmt.Errorf("error scanning posts categories: %v", err)
+		}
+
+		categories = append(categories, category)
+	}
+
+	return categories, nil
 
 }

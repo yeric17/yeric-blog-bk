@@ -46,6 +46,7 @@ func main() {
 	router.GET("/comments", controllers.GetComments)
 	router.GET("/comments/id/:id", controllers.GetCommentByID)
 	router.POST("/posts/upload", controllers.UploadPostImage)
+	router.GET("/posts/categories", controllers.GetPostsCategories)
 
 	router.Run(":" + config.APP_PORT)
 
