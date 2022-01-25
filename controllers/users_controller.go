@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"os"
 	"strings"
 	"yeric-blog/models"
 	"yeric-blog/utils"
@@ -179,7 +180,7 @@ func UserLogin(g *gin.Context) {
 		fmt.Println(err)
 		return
 	}
-	token, err := user.Login()
+	err := user.Login()
 
 	if err != nil {
 		var message string
@@ -209,10 +210,8 @@ func UserLogin(g *gin.Context) {
 		Success: true,
 		Message: "User logged",
 		Data:    user,
-		Token:   token,
 	}
-	//save token in cookie
-	g.SetCookie("token", token, 3600, "/", "localhost", false, true)
+
 	g.JSON(http.StatusOK, resp)
 
 }
@@ -232,7 +231,7 @@ func Authenticate(g *gin.Context) {
 		return
 	}
 
-	claim, err := models.Authenticate(token)
+	newUser, err := models.Authenticate(token)
 
 	if err != nil {
 		resp := utils.JSONResponse{
@@ -248,8 +247,7 @@ func Authenticate(g *gin.Context) {
 	resp := utils.JSONResponse{
 		Success: true,
 		Message: "Token authenticated",
-		Data:    claim,
-		Token:   token,
+		Data:    newUser,
 	}
 
 	g.JSON(http.StatusOK, resp)
@@ -391,9 +389,21 @@ func UploadUserPicture(g *gin.Context) {
 		return
 	}
 
-	fileName := fmt.Sprintf("%s.%s", name, file.Filename[strings.LastIndex(file.Filename, ".")+1:])
-	err = g.SaveUploadedFile(file, "./images/users/"+fileName)
+	fileName := fmt.Sprintf("%s.%s", utils.RandomString(6), file.Filename[strings.LastIndex(file.Filename, ".")+1:])
 
+	folderPath := fmt.Sprintf("%s/%s", "images/users", name)
+
+	_, err = os.Stat(folderPath)
+
+	//If exists folder remove it and create it again
+	if !os.IsNotExist(err) {
+		os.RemoveAll(folderPath)
+	}
+	os.Mkdir(folderPath, 0755)
+
+	fullPath := fmt.Sprintf("%s/%s", folderPath, fileName)
+
+	err = g.SaveUploadedFile(file, fullPath)
 	if err != nil {
 		resp := utils.JSONResponse{
 			Success: false,
@@ -407,7 +417,7 @@ func UploadUserPicture(g *gin.Context) {
 
 	user := &models.User{
 		ID:      name,
-		Picture: fmt.Sprintf("http://localhost:7070/images/users/%s", fileName),
+		Picture: fmt.Sprintf("http://localhost:7070/%s", fullPath),
 	}
 
 	if err := user.Update(); err != nil {

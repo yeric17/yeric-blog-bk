@@ -20,6 +20,7 @@ type User struct {
 	Picture  string `json:"picture,omitempty"`
 	Status   string `json:"status"`
 	RoleID   int    `json:"role_id"`
+	Token    string `json:"token,omitempty"`
 }
 
 type UserResponse struct {
@@ -29,6 +30,7 @@ type UserResponse struct {
 	Picture string `json:"picture,omitempty"`
 	Status  string `json:"status"`
 	Role    string `json:"role"`
+	Token   string `json:"token"`
 }
 
 type Roles struct {
@@ -99,12 +101,11 @@ func (u *UserResponse) GetUsers() ([]UserResponse, error) {
 func (u *User) GetUserByEmail(email string) error {
 	db := models.Connection
 
-	query := `SELECT user_id, user_name, email, password, user_picture, user_status, role_name 
-	FROM users 
-	LEFT JOIN roles ON role_id = user_role_id
+	query := `SELECT user_id, user_name, email, password, user_picture, user_status, user_role_id 
+	FROM users
 	WHERE email = $1`
 
-	err := db.QueryRow(query, email).Scan(&u.ID, &u.Name, &u.Email, &u.Password, &u.Status, &u.RoleID)
+	err := db.QueryRow(query, email).Scan(&u.ID, &u.Name, &u.Email, &u.Password, &u.Picture, &u.Status, &u.RoleID)
 
 	if err != nil {
 		return fmt.Errorf("error getting user: %s", err)
@@ -184,7 +185,7 @@ func (u *User) Update() error {
 	return nil
 }
 
-func (u *User) Login() (string, error) {
+func (u *User) Login() error {
 	db := models.Connection
 
 	query := `SELECT user_id, user_name, email, password, user_picture, user_status, user_role_id
@@ -196,20 +197,20 @@ func (u *User) Login() (string, error) {
 	err := db.QueryRow(query, u.Email).Scan(&u.ID, &u.Name, &u.Email, &u.Password, &u.Picture, &u.Status, &u.RoleID)
 
 	if err != nil {
-		return "", utils.NewCustomError("credentials", fmt.Sprintf("error not found user: %s", err))
+		return utils.NewCustomError("credentials", fmt.Sprintf("error not found user: %s", err))
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(prevPass))
 
 	if err != nil {
-		return "", utils.NewCustomError("credentials", fmt.Sprintf("error comparing password: %s", err))
+		return utils.NewCustomError("credentials", fmt.Sprintf("error comparing password: %s", err))
 	}
 
 	if u.Status == "email_not_verified" {
-		return "", utils.NewCustomError("confirm_email", fmt.Sprintf("error user email not verified: %s", err))
+		return utils.NewCustomError("confirm_email", fmt.Sprintf("error user email not verified: %s", err))
 	}
 	if u.Status == "inactive" {
-		return "", fmt.Errorf("error user is inactive")
+		return fmt.Errorf("error user is inactive")
 	}
 
 	u.Password = ""
@@ -231,13 +232,15 @@ func (u *User) Login() (string, error) {
 	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET_KEY")))
 
 	if err != nil {
-		return "", fmt.Errorf("error logging in: %s", err)
+		return fmt.Errorf("error logging in: %s", err)
 	}
 
-	return tokenString, nil
+	u.Token = tokenString
+
+	return nil
 }
 
-func Authenticate(token string) (UserClaims, error) {
+func Authenticate(token string) (User, error) {
 	var claim UserClaims
 
 	_, err := jwt.ParseWithClaims(token, &claim, func(token *jwt.Token) (interface{}, error) {
@@ -245,10 +248,41 @@ func Authenticate(token string) (UserClaims, error) {
 	})
 
 	if err != nil {
-		return claim, fmt.Errorf("error authenticating: %s", err)
+		return User{}, fmt.Errorf("error authenticating: %s", err)
 	}
 
-	return claim, nil
+	updateUser := User{}
+
+	err = updateUser.GetUserByEmail(claim.Email)
+
+	if err != nil {
+		fmt.Println(err)
+		return User{}, fmt.Errorf("error authenticating: %s", err)
+	}
+
+	updateClaim := UserClaims{
+		updateUser.ID,
+		updateUser.Name,
+		updateUser.Email,
+		updateUser.Picture,
+		updateUser.Status,
+		updateUser.RoleID,
+		jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
+		},
+	}
+
+	newToken := jwt.NewWithClaims(jwt.SigningMethodHS256, updateClaim)
+
+	newTokenString, err := newToken.SignedString([]byte(os.Getenv("SECRET_KEY")))
+
+	if err != nil {
+		return User{}, fmt.Errorf("error authenticating: %s", err)
+	}
+
+	updateUser.Token = newTokenString
+	updateUser.Password = ""
+	return updateUser, nil
 }
 
 func SaveEmailToConfirm(email string) (string, error) {
