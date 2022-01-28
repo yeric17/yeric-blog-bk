@@ -1,1 +1,1 @@
-web: bin/yeric-blog
+web: yeric-blog
