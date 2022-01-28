@@ -60,7 +60,8 @@ func init() {
 		Mail.From = os.Getenv("MAIL_USER")
 	}
 
-	ConnectionString = fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", DB_USER, DB_PASS, DB_HOST, DB_PORT, DB_NAME)
+	//ConnectionString = fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=e", DB_USER, DB_PASS, DB_HOST, DB_PORT, DB_NAME)
+	ConnectionString = fmt.Sprintf("postgres://%s:%s@%s:%s/%s", DB_USER, DB_PASS, DB_HOST, DB_PORT, DB_NAME)
 }
 
 type MailStruct struct {
