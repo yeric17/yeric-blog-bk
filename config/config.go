@@ -25,10 +25,10 @@ func init() {
 
 	if MODE == "dev" {
 		fmt.Println("Running in development mode")
-		DB_USER = "root"
-		DB_PASS = "1234567"
-		DB_NAME = "yeric-blog"
-		DB_HOST = "database"
+		DB_USER = "zzlflkhuhekryg"
+		DB_PASS = "1cb1f260dd6a4c2c1ede1ffb00e5944da1c000cdda8a7f76bda343c857ff910a"
+		DB_NAME = "dc791pktn9o1uh"
+		DB_HOST = "ec2-3-225-41-234.compute-1.amazonaws.com"
 		DB_PORT = "5432"
 		DB_DRIVER = "postgres"
 		APP_PORT = "7070"
