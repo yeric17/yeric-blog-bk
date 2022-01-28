@@ -1,13 +1,13 @@
 {
-    "name": "Start on Heroku: Go",
-    "description": "Go Getting Started Example App",
+    "name": "Yeric dev blog",
+    "description": "Go API",
     "keywords": [
       "yeric-blog",
       "go",
       "sample",
       "example"
     ],
-    "website": "http://github.com/heroku/go-getting-started",
-    "repository": "http://github.com/heroku/go-getting-started"
+    "website": "https://yeric-blog-api.herokuapp.com",
+    "repository": "https://github.com/yeric17/yeric-blog-bk"
   }
   
