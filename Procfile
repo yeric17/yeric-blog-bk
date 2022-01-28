@@ -1,1 +1,1 @@
-web: yeric-blog-api
+web: yeric-blog
