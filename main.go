@@ -12,10 +12,12 @@ import (
 func main() {
 	router := gin.Default()
 
+	gin.SetMode(gin.ReleaseMode)
+
 	//cors policy gin config
-	router.SetTrustedProxies([]string{"http://localhost:3000"})
+	router.SetTrustedProxies([]string{"http://localhost:3000", "http://0.0.0.0:3000"})
 	router.Use(corsgin.New(corsgin.Config{
-		AllowOrigins:     []string{"*"},
+		AllowOrigins:     []string{"http://localhost:3000", "http://0.0.0.0:3000"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},

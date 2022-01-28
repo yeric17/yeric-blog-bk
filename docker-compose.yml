@@ -29,5 +29,16 @@ services:
     restart: always
     volumes:
       - data:/images
+  # web:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: web
+  #   image: yeric-blog-web:v0.0.1
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - app
+  #   restart: always
 volumes:
   data:
