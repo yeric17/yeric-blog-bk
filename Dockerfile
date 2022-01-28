@@ -46,4 +46,4 @@ ENV HOME /app
 WORKDIR /app
 RUN useradd -m heroku
 USER heroku
-CMD /app/yeric-blog
+CMD /app/bin/yeric-blog

@@ -31,7 +31,7 @@ func init() {
 		DB_HOST = "ec2-3-89-214-80.compute-1.amazonaws.com"
 		DB_PORT = "5432"
 		DB_DRIVER = "postgres"
-		APP_PORT = "7070"
+		APP_PORT = os.Getenv("PORT")
 		Mail.Host = "smtp.gmail.com"
 		Mail.Port = 587
 		Mail.Username = "mail.manager.cf2345181@gmail.com"
@@ -46,7 +46,7 @@ func init() {
 		DB_HOST = os.Getenv("DB_HOST")
 		DB_PORT = os.Getenv("DB_PORT")
 		DB_DRIVER = os.Getenv("DB_DRIVER")
-		APP_PORT = os.Getenv("APP_PORT")
+		APP_PORT = os.Getenv("PORT")
 		Mail.Host = os.Getenv("MAIL_HOST")
 		Mail.Port, err = strconv.Atoi(os.Getenv("MAIL_PORT"))
 

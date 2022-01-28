@@ -1,16 +1,44 @@
 package main
 
 import (
+	"bytes"
+	"log"
+	"net/http"
+	"os"
+	"strconv"
 	"time"
-	"yeric-blog/config"
 	"yeric-blog/controllers"
 
 	corsgin "github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
+func repeatHandler(r int) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var buffer bytes.Buffer
+		for i := 0; i < r; i++ {
+			buffer.WriteString("Hello from Go!\n")
+		}
+		c.String(http.StatusOK, buffer.String())
+	}
+}
+
 func main() {
-	router := gin.Default()
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		log.Fatal("$PORT must be set")
+	}
+	tStr := os.Getenv("REPEAT")
+	repeat, err := strconv.Atoi(tStr)
+
+	if err != nil {
+		log.Printf("Error converting $REPEAT to an int: %q - Using default\n", err)
+		repeat = 5
+	}
+
+	router := gin.New()
+	router.Use(gin.Logger())
 
 	gin.SetMode(gin.ReleaseMode)
 
@@ -25,6 +53,10 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 	//router.Use(gin.Logger())
+
+	router.GET("/", func(c *gin.Context) {
+		c.String(http.StatusOK, "Welcome to Yeric Blog API")
+	})
 
 	router.Static("/images", "./images")
 	//image size 1MB
@@ -50,6 +82,8 @@ func main() {
 	router.POST("/posts/upload", controllers.UploadPostImage)
 	router.GET("/posts/categories", controllers.GetPostsCategories)
 
-	router.Run(":" + config.APP_PORT)
+	router.GET("/repeat", repeatHandler(repeat))
+
+	router.Run(":" + port)
 
 }
