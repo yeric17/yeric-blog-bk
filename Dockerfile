@@ -18,7 +18,7 @@ FROM alpine:3.14
 RUN apk add --no-cache ca-certificates && update-ca-certificates
 
 COPY --from=builder /app/yeric-blog .
-COPY --from=builder /app/.env .
+# COPY --from=builder /app/.env .
 COPY --from=builder /app/images ./images
 COPY --from=builder /app/email ./email
 
