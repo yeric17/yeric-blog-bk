@@ -360,7 +360,7 @@ func ConfirmEmail(g *gin.Context) {
 		return
 	}
 
-	g.Redirect(http.StatusMovedPermanently, "http://localhost:3000/login")
+	g.Redirect(http.StatusMovedPermanently, "https://yeric-blog-api.herokuapp.com/login")
 }
 
 func UploadUserPicture(g *gin.Context) {
@@ -417,7 +417,7 @@ func UploadUserPicture(g *gin.Context) {
 
 	user := &models.User{
 		ID:      name,
-		Picture: fmt.Sprintf("http://localhost:7070/%s", fullPath),
+		Picture: fmt.Sprintf("https://yeric-blog-api.herokuapp.com/%s", fullPath),
 	}
 
 	if err := user.Update(); err != nil {
