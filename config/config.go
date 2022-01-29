@@ -33,7 +33,7 @@ func init() {
 		DB_DRIVER = "postgres"
 		APP_PORT = os.Getenv("PORT")
 		Mail.Host = "smtp.gmail.com"
-		Mail.Port = 465
+		Mail.Port = 587
 		Mail.Username = "mail.manager.cf2345181@gmail.com"
 		Mail.Password = "cF6XN$ozi0b3"
 		Mail.From = "mail.manager.cf2345181@gmail.com"
