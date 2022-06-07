@@ -199,7 +199,7 @@ func (u *User) Login() error {
 	if err != nil {
 		return utils.NewCustomError("credentials", fmt.Sprintf("error not found user: %s", err))
 	}
-
+	println(u.Password)
 	err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(prevPass))
 
 	if err != nil {
