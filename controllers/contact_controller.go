@@ -67,7 +67,7 @@ func GetContacts(g *gin.Context) {
 	g.JSON(http.StatusOK, resp)
 }
 
-func DeleteByEmail(g *gin.Context) {
+func Delete(g *gin.Context) {
 	contact := models.ContactResponse{}
 
 	if err := g.BindJSON(&contact); err != nil {

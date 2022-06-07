@@ -72,10 +72,10 @@ func (c *ContactResponse) GetContacts() ([]ContactResponse, error) {
 	return contacts, nil
 }
 
-func (c *ContactResponse) DeleteByEmail() error {
+func (c *ContactResponse) Delete() error {
 	db := models.Connection
 
-	query := `DELETE FROM contacts WHERE contacts_email = $1`
+	query := `DELETE FROM contacts WHERE contacts_id = $1`
 
 	_, err := db.Exec(query, c.ID)
 

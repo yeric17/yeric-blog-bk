@@ -72,7 +72,7 @@ func main() {
 	router.GET("/confirm/:id", controllers.ConfirmEmail)
 	router.POST("/contact", controllers.ContactEmail)
 	router.GET("/contact", controllers.GetContacts)
-	router.DELETE("/contact", controllers.DeleteByEmail)
+	router.DELETE("/contact", controllers.Delete)
 	router.POST("/users/upload", controllers.UploadUserPicture)
 
 	router.POST("/posts", controllers.CreatePost)
