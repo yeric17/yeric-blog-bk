@@ -71,6 +71,7 @@ func main() {
 	router.POST("/users/register", controllers.Register)
 	router.GET("/confirm/:id", controllers.ConfirmEmail)
 	router.POST("/contact", controllers.ContactEmail)
+	router.GET("/contact", controllers.GetContacts)
 	router.POST("/users/upload", controllers.UploadUserPicture)
 
 	router.POST("/posts", controllers.CreatePost)

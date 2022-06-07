@@ -1,14 +1,18 @@
 package models
 
 import (
-	"bytes"
 	"fmt"
-	"html/template"
-	"yeric-blog/config"
 	models "yeric-blog/models/db"
 )
 
 type ContactMessage struct {
+	Name    string `json:"name"`
+	Email   string `json:"email"`
+	Message string `json:"message"`
+}
+
+type ContactResponse struct {
+	ID      int    `json:"id"`
 	Name    string `json:"name"`
 	Email   string `json:"email"`
 	Message string `json:"message"`
@@ -35,23 +39,35 @@ func (c *ContactMessage) Create() error {
 		return fmt.Errorf("error creating contact: %s", err.Error())
 	}
 
-	t, err := template.ParseFiles("email/contact_template.html")
-
-	if err != nil {
-		return fmt.Errorf("error parsing email template: %s", err.Error())
-	}
-
-	buff := new(bytes.Buffer)
-
-	if err := t.Execute(buff, c); err != nil {
-		return fmt.Errorf("error executing email template: %s", err.Error())
-	}
-
-	err = SendMail(fmt.Sprintf("%s contact you, email: %s", c.Name, c.Email), buff.String(), config.Mail.From)
-
-	if err != nil {
-		return fmt.Errorf("error sending email: %s", err.Error())
-	}
-
 	return nil
+}
+
+func (c *ContactResponse) GetContacts() ([]ContactResponse, error) {
+	db := models.Connection
+
+	query := `SELECT contacts_id, contacts_name, contacts_email, contacts_message FROM contacts`
+
+	rows, err := db.Query(query)
+
+	if err != nil {
+		return nil, fmt.Errorf("error getting contacts: %s", err.Error())
+	}
+
+	defer rows.Close()
+
+	var contacts []ContactResponse
+
+	for rows.Next() {
+		var contact ContactResponse
+
+		err := rows.Scan(&contact.ID, &contact.Name, &contact.Email, &contact.Message)
+
+		if err != nil {
+			return nil, fmt.Errorf("error getting contacts: %s", err.Error())
+		}
+
+		contacts = append(contacts, contact)
+	}
+
+	return contacts, nil
 }

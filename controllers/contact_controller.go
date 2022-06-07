@@ -41,3 +41,28 @@ func ContactEmail(g *gin.Context) {
 
 	g.JSON(http.StatusCreated, resp)
 }
+
+func GetContacts(g *gin.Context) {
+	contact := &models.ContactResponse{}
+
+	contacts, err := contact.GetContacts()
+
+	if err != nil {
+		resp := utils.JSONResponse{
+			Success: false,
+			Message: fmt.Sprintf("Error getting contacts: %s", err.Error()),
+			Data:    nil,
+		}
+		g.JSON(http.StatusInternalServerError, resp)
+		fmt.Println(err)
+		return
+	}
+
+	resp := utils.JSONResponse{
+		Success: true,
+		Message: "Contacts",
+		Data:    contacts,
+	}
+
+	g.JSON(http.StatusOK, resp)
+}
