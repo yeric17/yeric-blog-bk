@@ -67,7 +67,7 @@ func GetContacts(g *gin.Context) {
 	g.JSON(http.StatusOK, resp)
 }
 
-func Delete(g *gin.Context) {
+func DeleteContact(g *gin.Context) {
 	contact := models.ContactResponse{}
 	contact.ID = g.Param("id")
 	if(contact.ID == ""){
