@@ -69,7 +69,17 @@ func GetContacts(g *gin.Context) {
 
 func Delete(g *gin.Context) {
 	contact := models.ContactResponse{}
-
+	contact.ID = g.Param("id")
+	if(contact.ID == ""){
+		resp := utils.JSONResponse{
+			Success: false,
+			Message: fmt.Sprintf("Error id is required: %s", err.Error()),
+			Data:    nil,
+		}
+		g.JSON(http.StatusBadRequest, resp)
+		fmt.Println(err)
+		return		
+	}
 	if err := g.BindJSON(&contact); err != nil {
 		resp := utils.JSONResponse{
 			Success: false,
