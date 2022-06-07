@@ -80,17 +80,6 @@ func DeleteContact(g *gin.Context) {
 		fmt.Println(err)
 		return		
 	}
-	if err := g.BindJSON(&contact); err != nil {
-		resp := utils.JSONResponse{
-			Success: false,
-			Message: fmt.Sprintf("Error parsing contact: %s", err.Error()),
-			Data:    nil,
-		}
-		g.JSON(http.StatusBadRequest, resp)
-		fmt.Println(err)
-		return
-	}
-
 	if err := contact.Delete(); err != nil {
 		resp := utils.JSONResponse{
 			Success: false,
@@ -104,7 +93,7 @@ func DeleteContact(g *gin.Context) {
 	resp := utils.JSONResponse{
 		Success: true,
 		Message: "Contact deleted",
-		Data:    contact,
+		Data:    nil,
 	}
 
 	g.JSON(http.StatusOK, resp)
