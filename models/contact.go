@@ -71,3 +71,17 @@ func (c *ContactResponse) GetContacts() ([]ContactResponse, error) {
 
 	return contacts, nil
 }
+
+func (c *ContactResponse) DeleteByEmail() error {
+	db := models.Connection
+
+	query := `DELETE FROM contacts WHERE contacts_email = $1`
+
+	_, err := db.Exec(query, c.ID)
+
+	if err != nil {
+		return fmt.Errorf("error deleting contact: %s", err.Error())
+	}
+
+	return nil
+}

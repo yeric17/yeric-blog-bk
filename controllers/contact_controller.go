@@ -66,3 +66,36 @@ func GetContacts(g *gin.Context) {
 
 	g.JSON(http.StatusOK, resp)
 }
+
+func DeleteByEmail(g *gin.Context) {
+	contact := models.ContactResponse{}
+
+	if err := g.BindJSON(&contact); err != nil {
+		resp := utils.JSONResponse{
+			Success: false,
+			Message: fmt.Sprintf("Error parsing contact: %s", err.Error()),
+			Data:    nil,
+		}
+		g.JSON(http.StatusBadRequest, resp)
+		fmt.Println(err)
+		return
+	}
+
+	if err := contact.Delete(); err != nil {
+		resp := utils.JSONResponse{
+			Success: false,
+			Message: fmt.Sprintf("Error deleting contact: %s", err.Error()),
+			Data:    nil,
+		}
+		g.JSON(http.StatusInternalServerError, resp)
+		fmt.Println(err)
+		return
+	}
+	resp := utils.JSONResponse{
+		Success: true,
+		Message: "Contact deleted",
+		Data:    contact,
+	}
+
+	g.JSON(http.StatusOK, resp)
+}
