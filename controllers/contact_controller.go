@@ -70,15 +70,14 @@ func GetContacts(g *gin.Context) {
 func DeleteContact(g *gin.Context) {
 	contact := models.ContactResponse{}
 	contact.ID = g.Param("id")
-	if(contact.ID == ""){
+	if contact.ID == "" {
 		resp := utils.JSONResponse{
 			Success: false,
-			Message: fmt.Sprintf("Error id is required: %s", err.Error()),
+			Message: "Error id is required",
 			Data:    nil,
 		}
 		g.JSON(http.StatusBadRequest, resp)
-		fmt.Println(err)
-		return		
+		return
 	}
 	if err := contact.Delete(); err != nil {
 		resp := utils.JSONResponse{
