@@ -154,6 +154,12 @@ func (u *User) Update() error {
 
 	if u.Password != "" {
 		instructions = append(instructions, fmt.Sprintf("password = $%d", len(args)+1))
+		passByte, err := bcrypt.GenerateFromPassword([]byte(u.Password), 14)
+
+		if err != nil {
+			return fmt.Errorf("error updating user: %s", err)
+		}
+		u.Password = string(passByte)
 		args = append(args, u.Password)
 	}
 
