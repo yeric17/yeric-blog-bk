@@ -39,7 +39,6 @@ func main() {
 
 	router := gin.New()
 	router.Use(gin.Logger())
-	router.Use(TestMiddleWare)
 	gin.SetMode(gin.ReleaseMode)
 
 	//cors policy gin config
@@ -61,8 +60,9 @@ func main() {
 	router.Static("/images", "./images")
 	//image size 1MB
 	router.MaxMultipartMemory = 1 << 20
+
 	router.POST("/users", controllers.CreateUser)
-	router.GET("/users", controllers.GetUsers)
+	router.GET("/users", controllers.GetUsers, TestMiddleWare)
 	router.GET("/users/id/:id", controllers.GetUserByID)
 	router.GET("/users/email/:email", controllers.GetUserByEmail)
 	router.PUT("/users", controllers.UpdateUser)
