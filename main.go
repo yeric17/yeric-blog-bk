@@ -45,7 +45,7 @@ func main() {
 	//cors policy gin config
 	router.SetTrustedProxies([]string{"http://localhost:3000", "https://yeric-blog-web.herokuapp.com"})
 	router.Use(corsgin.New(corsgin.Config{
-		AllowOrigins:     []string{"*"},
+		AllowOrigins:     []string{"https://yericdev.herokuapp.com", "http://localhost:3000"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
