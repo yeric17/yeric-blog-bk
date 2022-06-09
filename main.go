@@ -92,5 +92,5 @@ func main() {
 }
 
 func Authenticate() gin.HandlerFunc {
-	return controllers.Authenticate
+	return controllers.AuthenticateMiddleware
 }

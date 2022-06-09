@@ -254,6 +254,37 @@ func Authenticate(g *gin.Context) {
 	g.Next()
 }
 
+func AuthenticateMiddleware(g *gin.Context) {
+	//Get the token from cookie
+	token := g.Request.Header.Get("Authorization")
+
+	if token == "" {
+		resp := utils.JSONResponse{
+			Success: false,
+			Message: "Error getting token",
+			Data:    nil,
+		}
+		g.AbortWithStatusJSON(http.StatusUnauthorized, resp)
+
+		return
+	}
+
+	_, err := models.Authenticate(token)
+
+	if err != nil {
+		resp := utils.JSONResponse{
+			Success: false,
+			Message: fmt.Sprintf("Error authenticating token: %s", err.Error()),
+			Data:    nil,
+		}
+		g.AbortWithStatusJSON(http.StatusUnauthorized, resp)
+		fmt.Println(err)
+		return
+	}
+
+	g.Next()
+}
+
 func Register(g *gin.Context) {
 
 	user := &models.User{}
