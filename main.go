@@ -39,7 +39,7 @@ func main() {
 
 	router := gin.New()
 	router.Use(gin.Logger())
-
+	router.Use(TestMiddleWare)
 	gin.SetMode(gin.ReleaseMode)
 
 	//cors policy gin config
@@ -88,4 +88,11 @@ func main() {
 
 	router.Run(":" + port)
 
+}
+
+func TestMiddleWare(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Hello from middleware",
+	})
+	c.Next()
 }
