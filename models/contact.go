@@ -45,7 +45,7 @@ func (c *ContactMessage) Create() error {
 func (c *ContactResponse) GetContacts() ([]ContactResponse, error) {
 	db := models.Connection
 
-	query := `SELECT contacts_id, contacts_name, contacts_email, contacts_message FROM contacts`
+	query := `SELECT contacts_id, contacts_name, contacts_email, contacts_message FROM contacts ORDER BY contacts_create_at DESC`
 
 	rows, err := db.Query(query)
 

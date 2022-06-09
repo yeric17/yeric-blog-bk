@@ -19,7 +19,7 @@ type ConfirmLink struct {
 
 func CreateUser(g *gin.Context) {
 	user := models.User{}
-
+	user.RoleID = 3
 	if err := g.BindJSON(&user); err != nil {
 		resp := utils.JSONResponse{
 			Success: false,
