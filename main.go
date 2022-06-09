@@ -63,7 +63,7 @@ func main() {
 	router.MaxMultipartMemory = 1 << 20
 
 	router.POST("/users", controllers.CreateUser)
-	router.GET("/users", controllers.GetUsers, TestMiddleWare())
+	router.GET("/users", TestMiddleWare(), controllers.GetUsers)
 	router.GET("/users/id/:id", controllers.GetUserByID)
 	router.GET("/users/email/:email", controllers.GetUserByEmail)
 	router.PUT("/users", controllers.UpdateUser)
