@@ -90,12 +90,12 @@ func main() {
 
 }
 
-func TestMiddleWare(c *gin.Context) {
-	if true {
-		return
+func TestMiddleWare() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if true {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "This is a middleware"})
+			return
+		}
+		c.Next()
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Hello from middleware",
-	})
-	c.Next()
 }
