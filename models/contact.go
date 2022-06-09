@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"time"
 	models "yeric-blog/models/db"
 )
 
@@ -12,10 +13,11 @@ type ContactMessage struct {
 }
 
 type ContactResponse struct {
-	ID      string `json:"id"`
-	Name    string `json:"name"`
-	Email   string `json:"email"`
-	Message string `json:"message"`
+	ID        string    `json:"id"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	Message   string    `json:"message"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 // CREATE TABLE IF NOT EXISTS "contacts" (
@@ -45,7 +47,7 @@ func (c *ContactMessage) Create() error {
 func (c *ContactResponse) GetContacts() ([]ContactResponse, error) {
 	db := models.Connection
 
-	query := `SELECT contacts_id, contacts_name, contacts_email, contacts_message FROM contacts ORDER BY contacts_create_at DESC`
+	query := `SELECT contacts_id, contacts_name, contacts_email, contacts_message, contacts_create_at FROM contacts ORDER BY contacts_create_at DESC`
 
 	rows, err := db.Query(query)
 
@@ -60,7 +62,7 @@ func (c *ContactResponse) GetContacts() ([]ContactResponse, error) {
 	for rows.Next() {
 		var contact ContactResponse
 
-		err := rows.Scan(&contact.ID, &contact.Name, &contact.Email, &contact.Message)
+		err := rows.Scan(&contact.ID, &contact.Name, &contact.Email, &contact.Message, &contact.CreatedAt)
 
 		if err != nil {
 			return nil, fmt.Errorf("error getting contacts: %s", err.Error())
