@@ -63,26 +63,26 @@ func main() {
 	router.MaxMultipartMemory = 1 << 20
 
 	router.POST("/users", controllers.CreateUser)
-	router.GET("/users", TestMiddleWare(), controllers.GetUsers)
-	router.GET("/users/id/:id", controllers.GetUserByID)
-	router.GET("/users/email/:email", controllers.GetUserByEmail)
-	router.PUT("/users", controllers.UpdateUser)
+	router.GET("/users", Authenticate(), controllers.GetUsers)
+	router.GET("/users/id/:id", Authenticate(), controllers.GetUserByID)
+	router.GET("/users/email/:email", Authenticate(), controllers.GetUserByEmail)
+	router.PUT("/users", Authenticate(), controllers.UpdateUser)
 	router.POST("/users/login", controllers.UserLogin)
 	router.GET("/users/auth", controllers.Authenticate)
 	router.POST("/users/register", controllers.Register)
 	router.GET("/confirm/:id", controllers.ConfirmEmail)
 	router.POST("/contact", controllers.ContactEmail)
-	router.GET("/contact", controllers.GetContacts)
-	router.DELETE("/contact/id/:id", controllers.DeleteContact)
-	router.POST("/users/upload", controllers.UploadUserPicture)
+	router.GET("/contact", Authenticate(), controllers.GetContacts)
+	router.DELETE("/contact/id/:id", Authenticate(), controllers.DeleteContact)
+	router.POST("/users/upload", Authenticate(), controllers.UploadUserPicture)
 
-	router.POST("/posts", controllers.CreatePost)
+	router.POST("/posts", Authenticate(), controllers.CreatePost)
 	router.GET("/posts", controllers.GetPosts)
-	router.POST("/posts/comment", controllers.CreateComment)
+	router.POST("/posts/comment", Authenticate(), controllers.CreateComment)
 	router.GET("/posts/id/:id", controllers.GetPostByID)
 	router.GET("/comments", controllers.GetComments)
 	router.GET("/comments/id/:id", controllers.GetCommentByID)
-	router.POST("/posts/upload", controllers.UploadPostImage)
+	router.POST("/posts/upload", Authenticate(), controllers.UploadPostImage)
 	router.GET("/posts/categories", controllers.GetPostsCategories)
 
 	router.GET("/repeat", repeatHandler(repeat))
@@ -91,12 +91,6 @@ func main() {
 
 }
 
-func TestMiddleWare() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		if true {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "This is a middleware"})
-			return
-		}
-		c.Next()
-	}
+func Authenticate() gin.HandlerFunc {
+	return controllers.Authenticate
 }

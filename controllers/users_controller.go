@@ -251,7 +251,7 @@ func Authenticate(g *gin.Context) {
 	}
 
 	g.JSON(http.StatusOK, resp)
-
+	g.Next()
 }
 
 func Register(g *gin.Context) {
