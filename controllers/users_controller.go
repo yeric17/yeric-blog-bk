@@ -226,7 +226,7 @@ func Authenticate(g *gin.Context) {
 			Message: "Error getting token",
 			Data:    nil,
 		}
-		g.JSON(http.StatusUnauthorized, resp)
+		g.AbortWithStatusJSON(http.StatusUnauthorized, resp)
 
 		return
 	}
@@ -239,7 +239,7 @@ func Authenticate(g *gin.Context) {
 			Message: fmt.Sprintf("Error authenticating token: %s", err.Error()),
 			Data:    nil,
 		}
-		g.JSON(http.StatusUnauthorized, resp)
+		g.AbortWithStatusJSON(http.StatusUnauthorized, resp)
 		fmt.Println(err)
 		return
 	}
