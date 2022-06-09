@@ -91,6 +91,9 @@ func main() {
 }
 
 func TestMiddleWare(c *gin.Context) {
+	if true {
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Hello from middleware",
 	})
